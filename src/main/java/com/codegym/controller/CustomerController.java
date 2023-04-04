@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
 import com.codegym.service.ICustomerService;
 
@@ -43,21 +44,17 @@ public class CustomerController {
 
     @GetMapping("/edit-customer/{id}")
     public ModelAndView showEditForm(@PathVariable Long id) {
-        Customer customer = customerService.findById(id);
-        if (customer != null) {
-            ModelAndView modelAndView = new ModelAndView("/customer/edit");
-            modelAndView.addObject("customer", customer);
-            return modelAndView;
-        } else {
-            ModelAndView modelAndView = new ModelAndView("/customer/error404");
-            return modelAndView;
-        }
+        ModelAndView modelAndView = new ModelAndView("/customer/edit");
+        RestTemplate restTemplate = new RestTemplate();
+        Customer customer = restTemplate.getForObject("http://localhost:8080/findById/" + id, Customer.class);
+        modelAndView.addObject("customer", customer);
+        return modelAndView;
     }
 
     @PostMapping("/edit-customer")
     public ModelAndView updateCustomer(@ModelAttribute("customer") Customer customer) {
         customerService.save(customer);
-        ModelAndView modelAndView = new ModelAndView("/customer/list");
+        ModelAndView modelAndView = new ModelAndView("redirect:/customers");
         modelAndView.addObject("customer", customer);
         modelAndView.addObject("message", "edit customer successfully!");
         return modelAndView;
@@ -65,19 +62,16 @@ public class CustomerController {
 
     @GetMapping("/delete-customer/{id}")
     public ModelAndView showDeleteForm(@PathVariable Long id) {
-        Customer customer = customerService.findById(id);
-        if (customer != null) {
-            ModelAndView modelAndView = new ModelAndView("/customer/delete");
-            modelAndView.addObject("customer", customer);
-            modelAndView.addObject("message", "delete customer successfully!");
-            return modelAndView;
-        } else {
-            ModelAndView modelAndView = new ModelAndView("/customer/error404");
-            return modelAndView;
-        }
+        ModelAndView modelAndView = new ModelAndView("/customer/delete");
+        RestTemplate restTemplate = new RestTemplate();
+        Customer customer = restTemplate.getForObject("http://localhost:8080/findById/" + id, Customer.class);
+        modelAndView.addObject("customer", customer);
+        modelAndView.addObject("message", "delete customer successfully!");
+        return modelAndView;
     }
+
     @PostMapping("/delete-customer")
-    public String deleteForm(@ModelAttribute("customer") Customer customer){
+    public String deleteForm(@ModelAttribute("customer") Customer customer) {
         customerService.remove(customer.getId());
         return "redirect:customers";
     }

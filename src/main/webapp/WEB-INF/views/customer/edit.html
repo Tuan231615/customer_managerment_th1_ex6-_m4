@@ -7,8 +7,8 @@
 <body>
 <h2>Edit Customer</h2>
 <p><a href="/customers">Back to list customer</a></p>
-<th:block th:if="${message}">
-    <p th:text="${message}"></p>
+<th:block th:if="${#messages}">
+    <p th:text="${#messages}"></p>
 </th:block>
 <form th:action="@{/edit-customer}" th:object="${customer}" method="post">
 <input type="hidden" name="id" th:field="*{id}"/>
